@@ -1,9 +1,14 @@
 from twisted.internet.interfaces import ITransport
-from twisted.internet.base import BaseConnector
-from twisted.internet import reactor, tcp
-from twisted.internet import protocol, defer
-from twisted.python import log, failure
-import struct, re, socket, sys
+from twisted.internet import reactor
+from twisted.internet import tcp
+from twisted.internet import protocol
+from twisted.internet import defer
+from twisted.python import log
+from twisted.python import failure
+
+import struct
+import re
+import sys
 
 from sockserror import *
 
@@ -19,16 +24,9 @@ class ClientProtocol(protocol.Protocol):
     __implements__ = ITransport,
     disconnecting = 0
 
-    def __init__(self, sockshost, socksport, host, port, factory, otherProtocol,
+    def __init__(self, host, port, factory, otherProtocol,
                  method="CONNECT", login=None, password=None):
         """ Initializes SOCKS session
-
-        @type sockshost: string
-        @param sockshost: Domain name or ip address of intermediate SOCKS
-server.
-
-        @type socksport: int
-        @param socksport: Port number of intermediate server.
 
         @type host: string
         @param host: Domain name or ip address where should connect or bind.
@@ -77,7 +75,8 @@ server.
 
         log.debug("SOCKS5.connectionMade")
         methods = "\x00"
-        if not self.login is None: methods += "\x02"
+        if self.login is not None:
+            methods += "\x02"
 
         connstring = struct.pack("!BB", 5, len(methods))
 
@@ -86,13 +85,13 @@ server.
 
     def dataReceived(self, data):
         log.debug("SOCKS state=" + self.state)
-        method = getattr(self, 'socks_%s' % (self.state),
+        method = getattr(self, 'socks_%s' % (self.state,),
                          self.socks_thisMustNeverHappen)
         method(data)
 
     def socks_thisMustNeverHappen(self, data):
         self.transport.loseConnection()
-        raise UnhandledStateError("This SOCKS5 self.state (%s) " \
+        raise UnhandledStateError("This SOCKS5 self.state (%s) "
                                   "must never happen %s" % (self.state, self))
 
     def socks_mustNotReceiveData(self, data):
@@ -153,7 +152,7 @@ server.
         self.state = "gotAuthReply"
 
     def sendCurrentMethod(self):
-        method = getattr(self, 'socks_method_%s' % (self.method),
+        method = getattr(self, 'socks_method_%s' % (self.method,),
                          self.socks_method_UNKNOWNMETHOD)
         method()
 
@@ -296,6 +295,12 @@ class ClientFactory(protocol.ClientFactory):
         """ Factory creates SOCKS5 client protocol to connect through it.
         See ClientProtocol constructor for details on params.
 
+        @type sockshost: string
+        @param sockshost: SOCKS5 compliant server address.
+
+        @type socksport: int
+        @param socksport: Port to use when connecting to SOCKS.
+
         @type globalTimeout: int
         @param globalTimeout: Seconds before connection is completely and
             unconditionally closed as is.
@@ -357,8 +362,7 @@ class ClientFactory(protocol.ClientFactory):
     def buildProtocol(self, a):
         """ Connection is successful, create protocol and let it talk to peer.
         """
-        proto = ClientProtocol(sockshost=self.sockshost,
-                               socksport=self.socksport, host=self.host,
+        proto = ClientProtocol(host=self.host,
                                port=self.port,
                                method=self.method, login=self.login,
                                password=self.password,
@@ -420,6 +424,3 @@ class ProxyClientCreator(protocol.ClientCreator):
                                  otherFactory=f,
                                  readableID=id)
         return d
-
-
-
