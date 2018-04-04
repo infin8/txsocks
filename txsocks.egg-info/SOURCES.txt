@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+txsocks/__init__.py
+txsocks.egg-info/PKG-INFO
+txsocks.egg-info/SOURCES.txt
+txsocks.egg-info/dependency_links.txt
+txsocks.egg-info/entry_points.txt
+txsocks.egg-info/top_level.txt
+txsocks.egg-info/zip-safe

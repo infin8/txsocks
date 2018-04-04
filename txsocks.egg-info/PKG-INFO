@@ -1,0 +1,12 @@
+Metadata-Version: 1.0
+Name: txsocks
+Version: 0.0.dev0
+Summary: Socks 5 Client for Twisted
+Home-page: https://infin8.github.io/
+Author: n8
+Author-email: yo.its.n8@gmail.com
+License: MIT
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Keywords: twisted socks socks5
+Platform: UNKNOWN
